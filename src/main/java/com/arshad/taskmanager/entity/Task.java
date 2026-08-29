@@ -57,4 +57,30 @@ public class Task {
         this.dueDate = dueDate;
     }
 
+    public void patch(
+            String title,
+            String description,
+            TaskPriority priority,
+            LocalDateTime dueDate
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+
+        if (description != null) {
+            this.description = description;
+        }
+
+        if (priority != null) {
+            this.priority = priority;
+        }
+
+        if (dueDate != null) {
+            this.dueDate = dueDate;
+        }
+    }
+
+    public void changeStatus(TaskStatus status) {
+        this.status = status;
+    }
 }

@@ -1,7 +1,9 @@
 package com.arshad.taskmanager.controller;
 
+import com.arshad.taskmanager.dto.TaskPatchRequest;
 import com.arshad.taskmanager.dto.TaskRequest;
 import com.arshad.taskmanager.dto.TaskResponse;
+import com.arshad.taskmanager.dto.TaskStatusRequest;
 import com.arshad.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +61,27 @@ public class TaskController {
         taskService.deleteTask(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TaskResponse> patchTask(
+            @PathVariable Long id,
+            @Valid @RequestBody TaskPatchRequest request
+            ) {
+
+        return ResponseEntity.ok(
+                taskService.patchTask(id, request)
+        );
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TaskResponse> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody TaskStatusRequest request
+            ) {
+
+        return ResponseEntity.ok(
+                taskService.updateStatus(id, request)
+        );
     }
 }

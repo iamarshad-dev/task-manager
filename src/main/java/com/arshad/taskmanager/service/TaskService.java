@@ -1,7 +1,9 @@
 package com.arshad.taskmanager.service;
 
+import com.arshad.taskmanager.dto.TaskPatchRequest;
 import com.arshad.taskmanager.dto.TaskRequest;
 import com.arshad.taskmanager.dto.TaskResponse;
+import com.arshad.taskmanager.dto.TaskStatusRequest;
 import com.arshad.taskmanager.entity.Task;
 import com.arshad.taskmanager.exception.TaskNotFoundException;
 import com.arshad.taskmanager.repository.TaskRepository;
@@ -69,5 +71,30 @@ public class TaskService {
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
         taskRepository.delete(task);
+    }
+
+    @Transactional
+    public TaskResponse patchTask(Long id, TaskPatchRequest request) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        task.patch(
+                request.title(),
+                request.description(),
+                request.priority(),
+                request.dueDate()
+        );
+
+        return TaskResponse.from(task);
+    }
+
+    @Transactional
+    public TaskResponse updateStatus(Long id, TaskStatusRequest request) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        task.changeStatus(request.status());
+
+        return TaskResponse.from(task);
     }
 }
