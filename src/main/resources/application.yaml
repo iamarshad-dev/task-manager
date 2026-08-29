@@ -19,3 +19,8 @@ spring:
 
   flyway:
     enabled: true
+
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
