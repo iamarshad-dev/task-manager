@@ -41,4 +41,28 @@ public class GlobalExceptionHandler {
                 .body(response);
 
     }
+
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleTaskNotFoundException(
+            TaskNotFoundException exception,
+            HttpServletRequest request
+    ) {
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                request.getRequestURI(),
+                List.of(
+                        new ApiFieldError(
+                                null,
+                                exception.getMessage()
+                        )
+                )
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
 }
