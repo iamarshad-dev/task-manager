@@ -45,4 +45,16 @@ public class Task {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    public void update(
+            String title,
+            String description,
+            TaskPriority priority,
+            LocalDateTime dueDate
+    ) {
+        this.title = title;
+        this.description = description;
+        this.priority = priority;
+        this.dueDate = dueDate;
+    }
+
 }

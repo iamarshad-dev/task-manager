@@ -47,4 +47,27 @@ public class TaskService {
 
         return TaskResponse.from(task);
     }
+
+    @Transactional
+    public TaskResponse updateTask(Long id, TaskRequest request) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        task.update(
+                request.title(),
+                request.description(),
+                request.priority(),
+                request.dueDate()
+        );
+
+        return TaskResponse.from(task);
+    }
+
+    @Transactional
+    public void deleteTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        taskRepository.delete(task);
+    }
 }
