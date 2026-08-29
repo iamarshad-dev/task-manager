@@ -8,10 +8,10 @@ import com.arshad.taskmanager.entity.Task;
 import com.arshad.taskmanager.exception.TaskNotFoundException;
 import com.arshad.taskmanager.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +35,10 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll()
-                .stream()
-                .map(TaskResponse::from)
-                .toList();
+    public Page<TaskResponse> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable)
+                .map(TaskResponse::from);
+
     }
 
     @Transactional(readOnly = true)
