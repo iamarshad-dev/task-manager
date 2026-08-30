@@ -9,9 +9,11 @@ import com.arshad.taskmanager.entity.TaskPriority;
 import com.arshad.taskmanager.entity.TaskStatus;
 import com.arshad.taskmanager.exception.TaskNotFoundException;
 import com.arshad.taskmanager.repository.TaskRepository;
+import com.arshad.taskmanager.specification.TaskSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,31 +44,13 @@ public class TaskService {
             TaskPriority priority,
             Pageable pageable
     ) {
+        Specification<Task> specification = Specification
+                .where(TaskSpecification.hasStatus(status))
+                .and(TaskSpecification.hasPriority(priority));
 
-        Page<Task> tasks;
-
-        if (status != null && priority != null) {
-            tasks = taskRepository.findByStatusAndPriority(
-                    status,
-                    priority,
-                    pageable
-            );
-        } else if (status != null) {
-            tasks = taskRepository.findByStatus(
-                    status,
-                    pageable
-            );
-        } else if (priority != null) {
-            tasks = taskRepository.findByPriority(
-                    priority,
-                    pageable
-            );
-        } else {
-            tasks = taskRepository.findAll(pageable);
-        }
-
-        return tasks.map(TaskResponse::from);
-
+        return taskRepository
+                .findAll(specification, pageable)
+                .map(TaskResponse::from);
     }
 
     @Transactional(readOnly = true)
