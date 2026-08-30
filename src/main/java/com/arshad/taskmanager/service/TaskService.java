@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -42,11 +44,17 @@ public class TaskService {
     public Page<TaskResponse> getAllTasks(
             TaskStatus status,
             TaskPriority priority,
+            String title,
+            LocalDateTime dueDateFrom,
+            LocalDateTime dueDateTo,
             Pageable pageable
     ) {
         Specification<Task> specification = Specification
                 .where(TaskSpecification.hasStatus(status))
-                .and(TaskSpecification.hasPriority(priority));
+                .and(TaskSpecification.hasPriority(priority))
+                .and(TaskSpecification.titleContains(title))
+                .and(TaskSpecification.dueDateFrom(dueDateFrom))
+                .and(TaskSpecification.dueDateTo(dueDateTo));
 
         return taskRepository
                 .findAll(specification, pageable)

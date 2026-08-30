@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -42,6 +43,9 @@ public class TaskController {
     public ResponseEntity<Page<TaskResponse>> getAllTasks(
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false) TaskPriority priority,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) LocalDateTime dueDateFrom,
+            @RequestParam(required = false) LocalDateTime dueDateTo,
             @PageableDefault(
                     size = 10,
                     sort = "createdAt",
@@ -52,6 +56,9 @@ public class TaskController {
                 taskService.getAllTasks(
                         status,
                         priority,
+                        title,
+                        dueDateFrom,
+                        dueDateTo,
                         pageable
                 )
         );

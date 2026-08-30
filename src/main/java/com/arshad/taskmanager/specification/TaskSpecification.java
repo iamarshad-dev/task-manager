@@ -5,6 +5,8 @@ import com.arshad.taskmanager.entity.TaskPriority;
 import com.arshad.taskmanager.entity.TaskStatus;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
+
 public final class TaskSpecification {
 
     private TaskSpecification() {
@@ -32,6 +34,45 @@ public final class TaskSpecification {
             return criteriaBuilder.equal(
                     root.get("priority"),
                     priority
+            );
+        };
+    }
+
+    public static Specification<Task> titleContains(String title) {
+        return (root, query, criteriaBuilder) -> {
+            if (title == null || title.isBlank()) {
+              return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder.like(
+                  criteriaBuilder.lower(root.get("title")),
+                  "%" + title.toLowerCase() + "%"
+            );
+        };
+    }
+
+    public static Specification<Task> dueDateFrom(LocalDateTime dueDateFrom) {
+        return (root, query, criteriaBuilder) -> {
+            if (dueDateFrom == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder.greaterThanOrEqualTo(
+                    root.get("dueDate"),
+                    dueDateFrom
+            );
+        };
+    }
+
+    public static Specification<Task> dueDateTo(LocalDateTime dueDateTo) {
+        return (root, query, criteriaBuilder) -> {
+            if (dueDateTo == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder.lessThanOrEqualTo(
+                    root.get("dueDate"),
+                    dueDateTo
             );
         };
     }
