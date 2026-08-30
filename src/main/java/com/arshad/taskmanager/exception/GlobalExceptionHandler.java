@@ -7,6 +7,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.databind.exc.InvalidFormatException;
 
 import java.time.Instant;
@@ -130,6 +131,60 @@ public class GlobalExceptionHandler {
                         new ApiFieldError(
                                 null,
                                 "Malformed request body"
+                        )
+                )
+        );
+
+        return ResponseEntity
+                .badRequest()
+                .body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+    ) {
+        Class<?> requiredType = exception.getRequiredType();
+
+        if (requiredType != null && requiredType.isEnum()) {
+
+            String allowedValues = Arrays.stream(requiredType.getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+
+            ApiErrorResponse response = new ApiErrorResponse(
+                    Instant.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                    request.getRequestURI(),
+                    List.of(
+                            new ApiFieldError(
+                                    exception.getName(),
+                                    "Invalid value '%s'. Allowed values: %s"
+                                            .formatted(
+                                                    exception.getValue(),
+                                                    allowedValues
+                                            )
+                            )
+                    )
+            );
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(response);
+        }
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                request.getRequestURI(),
+                List.of(
+                        new ApiFieldError(
+                                exception.getName(),
+                                "Invalid value '%s'"
+                                        .formatted(exception.getValue())
                         )
                 )
         );
