@@ -4,6 +4,8 @@ import com.arshad.taskmanager.dto.TaskPatchRequest;
 import com.arshad.taskmanager.dto.TaskRequest;
 import com.arshad.taskmanager.dto.TaskResponse;
 import com.arshad.taskmanager.dto.TaskStatusRequest;
+import com.arshad.taskmanager.entity.TaskPriority;
+import com.arshad.taskmanager.entity.TaskStatus;
 import com.arshad.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<Page<TaskResponse>> getAllTasks(
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) TaskPriority priority,
             @PageableDefault(
                     size = 10,
                     sort = "createdAt",
@@ -45,7 +49,11 @@ public class TaskController {
             ) Pageable pageable
     ) {
         return ResponseEntity.ok(
-                taskService.getAllTasks(pageable)
+                taskService.getAllTasks(
+                        status,
+                        priority,
+                        pageable
+                )
         );
     }
 

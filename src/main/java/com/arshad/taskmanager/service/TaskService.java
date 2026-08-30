@@ -5,6 +5,8 @@ import com.arshad.taskmanager.dto.TaskRequest;
 import com.arshad.taskmanager.dto.TaskResponse;
 import com.arshad.taskmanager.dto.TaskStatusRequest;
 import com.arshad.taskmanager.entity.Task;
+import com.arshad.taskmanager.entity.TaskPriority;
+import com.arshad.taskmanager.entity.TaskStatus;
 import com.arshad.taskmanager.exception.TaskNotFoundException;
 import com.arshad.taskmanager.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +37,35 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskResponse> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable)
-                .map(TaskResponse::from);
+    public Page<TaskResponse> getAllTasks(
+            TaskStatus status,
+            TaskPriority priority,
+            Pageable pageable
+    ) {
+
+        Page<Task> tasks;
+
+        if (status != null && priority != null) {
+            tasks = taskRepository.findByStatusAndPriority(
+                    status,
+                    priority,
+                    pageable
+            );
+        } else if (status != null) {
+            tasks = taskRepository.findByStatus(
+                    status,
+                    pageable
+            );
+        } else if (priority != null) {
+            tasks = taskRepository.findByPriority(
+                    priority,
+                    pageable
+            );
+        } else {
+            tasks = taskRepository.findAll(pageable);
+        }
+
+        return tasks.map(TaskResponse::from);
 
     }
 
