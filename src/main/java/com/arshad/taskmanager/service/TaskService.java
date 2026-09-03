@@ -11,6 +11,7 @@ import com.arshad.taskmanager.exception.TaskNotFoundException;
 import com.arshad.taskmanager.repository.TaskRepository;
 import com.arshad.taskmanager.specification.TaskSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -27,6 +29,7 @@ public class TaskService {
 
     @Transactional
     public TaskResponse createTask(TaskRequest request) {
+        log.info("Creating task with title: {}", request.title());
 
         Task task = Task.builder()
                 .title(request.title())
@@ -36,6 +39,8 @@ public class TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
+
+        log.info("Task created successfully with id: {}", savedTask.getId());
 
         return TaskResponse.from(savedTask);
     }
@@ -49,6 +54,17 @@ public class TaskService {
             LocalDateTime dueDateTo,
             Pageable pageable
     ) {
+        log.debug(
+                "Fetching tasks. status={}, priority={}, title={}, dueDateFrom={}, dueDateTo={}, page={}, size={}",
+                status,
+                priority,
+                title,
+                dueDateFrom,
+                dueDateTo,
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
         Specification<Task> specification = Specification
                 .where(TaskSpecification.hasStatus(status))
                 .and(TaskSpecification.hasPriority(priority))
@@ -63,16 +79,18 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public TaskResponse getTaskById(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new TaskNotFoundException(id));
+        log.debug("Fetching task with id: {}", id);
+
+        Task task = findTaskById(id);
 
         return TaskResponse.from(task);
     }
 
     @Transactional
     public TaskResponse updateTask(Long id, TaskRequest request) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        log.info("Updating task with id: {}", id);
+
+        Task task = findTaskById(id);
 
         task.update(
                 request.title(),
@@ -81,21 +99,27 @@ public class TaskService {
                 request.dueDate()
         );
 
+        log.info("Task updated successfully with id: {}", id);
+
         return TaskResponse.from(task);
     }
 
     @Transactional
     public void deleteTask(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        log.info("Deleting task with id: {}", id);
+
+        Task task = findTaskById(id);
 
         taskRepository.delete(task);
+
+        log.info("Task deleted successfully with id: {}", id);
     }
 
     @Transactional
     public TaskResponse patchTask(Long id, TaskPatchRequest request) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        log.info("Partially updating task with id: {}", id);
+
+        Task task = findTaskById(id);
 
         task.patch(
                 request.title(),
@@ -104,16 +128,37 @@ public class TaskService {
                 request.dueDate()
         );
 
+        log.info("Task patched successfully with id: {}", id);
+
         return TaskResponse.from(task);
     }
 
     @Transactional
     public TaskResponse updateStatus(Long id, TaskStatusRequest request) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        log.info(
+                "Updating task status. id={}, status={}",
+                id,
+                request.status()
+        );
+
+        Task task = findTaskById(id);
 
         task.changeStatus(request.status());
 
+        log.info(
+                "Task status updated successfully. id={}, status={}",
+                id,
+                request.status()
+        );
+
         return TaskResponse.from(task);
+    }
+
+    private Task findTaskById(Long id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Task not found with id: {}", id);
+                    return new TaskNotFoundException(id);
+                });
     }
 }

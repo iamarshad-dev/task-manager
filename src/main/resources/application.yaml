@@ -24,3 +24,9 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+
+
+  logging:
+    level:
+      root: INFO
+      com.arshad.taskmanager: DEBUG
